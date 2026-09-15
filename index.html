@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HSK 6级 한자 플래시카드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#211f1c;
+    --paper:#efe7d8;
+    --paper-deep:#e4dac5;
+    --seal:#a3341f;
+    --seal-dark:#7f2716;
+    --gold:#a8863c;
+    --line: rgba(33,31,28,0.14);
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    height:100%;
+    margin:0;
+  }
+
+  body{
+    background:
+      radial-gradient(circle at 12% 8%, rgba(163,52,31,0.06), transparent 40%),
+      radial-gradient(circle at 90% 85%, rgba(168,134,60,0.08), transparent 45%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"Noto Sans KR", sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    padding:32px 20px;
+  }
+
+  .stage{
+    width:100%;
+    max-width:460px;
+  }
+
+  .masthead{
+    text-align:center;
+    margin-bottom:28px;
+  }
+
+  .masthead .cn{
+    font-family:"Noto Serif SC", serif;
+    font-size:15px;
+    letter-spacing:0.4em;
+    color:var(--seal);
+    margin:0 0 6px;
+  }
+
+  .masthead h1{
+    font-size:20px;
+    font-weight:700;
+    margin:0;
+    letter-spacing:0.02em;
+  }
+
+  .counter{
+    text-align:center;
+    font-size:13px;
+    color:var(--ink);
+    opacity:0.55;
+    margin-bottom:14px;
+    letter-spacing:0.06em;
+  }
+
+  .card-frame{
+    position:relative;
+    padding:10px;
+  }
+
+  .card-frame::before,
+  .card-frame::after{
+    content:"";
+    position:absolute;
+    width:26px;
+    height:26px;
+    border:2px solid var(--gold);
+    opacity:0.55;
+  }
+  .card-frame::before{ top:0; left:0; border-right:none; border-bottom:none; }
+  .card-frame::after{ bottom:0; right:0; border-left:none; border-top:none; }
+
+  .scene{
+    perspective:1400px;
+    height:320px;
+    cursor:pointer;
+  }
+
+  .card{
+    position:relative;
+    width:100%;
+    height:100%;
+    transform-style:preserve-3d;
+    transition:transform 0.55s cubic-bezier(.4,.2,.2,1);
+  }
+
+  .card.flipped{
+    transform:rotateY(180deg);
+  }
+
+  .face{
+    position:absolute;
+    inset:0;
+    -webkit-backface-visibility:hidden;
+    backface-visibility:hidden;
+    border-radius:4px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:var(--paper-deep);
+    border:1px solid var(--line);
+    box-shadow: 0 18px 36px -20px rgba(33,31,28,0.45);
+    padding:24px;
+    text-align:center;
+  }
+
+  .face-back{
+    transform:rotateY(180deg);
+  }
+
+  .hanzi{
+    font-family:"Noto Serif SC", serif;
+    font-weight:700;
+    font-size:clamp(56px, 16vw, 84px);
+    color:var(--ink);
+    line-height:1;
+  }
+
+  .hint{
+    margin-top:18px;
+    font-size:12px;
+    letter-spacing:0.28em;
+    color:var(--seal);
+    opacity:0.75;
+  }
+
+  .pinyin{
+    font-family:"Noto Serif SC", serif;
+    font-size:26px;
+    color:var(--seal-dark);
+    margin-bottom:14px;
+  }
+
+  .divider{
+    width:36px;
+    height:1px;
+    background:var(--gold);
+    opacity:0.6;
+    margin-bottom:14px;
+  }
+
+  .meaning{
+    font-size:17px;
+    font-weight:500;
+    line-height:1.5;
+    color:var(--ink);
+  }
+
+  .controls{
+    display:grid;
+    grid-template-columns:1fr 1.2fr 1fr;
+    gap:10px;
+    margin-top:22px;
+  }
+
+  button{
+    font-family:"Noto Sans KR", sans-serif;
+    font-size:14px;
+    font-weight:500;
+    padding:13px 8px;
+    border-radius:3px;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--ink);
+    cursor:pointer;
+    transition:background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+    letter-spacing:0.02em;
+  }
+
+  button:hover{
+    border-color:var(--seal);
+    color:var(--seal-dark);
+  }
+
+  button:active{
+    background:rgba(163,52,31,0.08);
+  }
+
+  .btn-flip{
+    background:var(--seal);
+    color:var(--paper);
+    border-color:var(--seal);
+    font-weight:700;
+  }
+
+  .btn-flip:hover{
+    background:var(--seal-dark);
+    border-color:var(--seal-dark);
+    color:var(--paper);
+  }
+
+  button:focus-visible{
+    outline:2px solid var(--seal);
+    outline-offset:2px;
+  }
+
+  .footnote{
+    text-align:center;
+    margin-top:18px;
+    font-size:12px;
+    color:var(--ink);
+    opacity:0.45;
+  }
+
+  @media (max-width:380px){
+    .scene{ height:280px; }
+    .controls{ grid-template-columns:1fr 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="masthead">
+    <p class="cn">汉语水平考试 · 六级</p>
+    <h1>HSK 6급 한자 플래시카드</h1>
+  </div>
+
+  <p class="counter" id="counter">1 / 24</p>
+
+  <div class="card-frame">
+    <div class="scene" id="scene">
+      <div class="card" id="card">
+        <div class="face face-front">
+          <div class="hanzi" id="hanziText"></div>
+          <div class="hint">탭하여 뒤집기</div>
+        </div>
+        <div class="face face-back">
+          <div class="pinyin" id="pinyinText"></div>
+          <div class="divider"></div>
+          <div class="meaning" id="meaningText"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="prevBtn" type="button">← 이전</button>
+    <button id="flipBtn" class="btn-flip" type="button">뒤집기</button>
+    <button id="nextBtn" type="button">다음 →</button>
+  </div>
+
+  <p class="footnote">HSK 6급 출제 빈도가 높은 어휘 모음</p>
+</div>
+
+<script>
+  const words = [
+    { hanzi:"挑剔", pinyin:"tiāo tī", meaning:"트집 잡다, 까다롭게 굴다" },
+    { hanzi:"迟钝", pinyin:"chí dùn", meaning:"둔하다, 반응이 느리다" },
+    { hanzi:"唠叨", pinyin:"láo dao", meaning:"잔소리하다, 수다스럽다" },
+    { hanzi:"精湛", pinyin:"jīng zhàn", meaning:"(기예가) 뛰어나다, 정교하다" },
+    { hanzi:"顽强", pinyin:"wán qiáng", meaning:"완강하다, 강인하다" },
+    { hanzi:"悬殊", pinyin:"xuán shū", meaning:"차이가 매우 크다, 현저하다" },
+    { hanzi:"奢侈", pinyin:"shē chǐ", meaning:"사치스럽다" },
+    { hanzi:"荒唐", pinyin:"huāng táng", meaning:"황당하다, 터무니없다" },
+    { hanzi:"妥协", pinyin:"tuǒ xié", meaning:"타협하다" },
+    { hanzi:"侵犯", pinyin:"qīn fàn", meaning:"침범하다, 침해하다" },
+    { hanzi:"潜移默化", pinyin:"qián yí mò huà", meaning:"은연중에 감화되다" },
+    { hanzi:"一如既往", pinyin:"yì rú jì wǎng", meaning:"예전과 다름없이" },
+    { hanzi:"举世瞩目", pinyin:"jǔ shì zhǔ mù", meaning:"온 세상이 주목하다" },
+    { hanzi:"络绎不绝", pinyin:"luò yì bù jué", meaning:"왕래가 끊이지 않다" },
+    { hanzi:"屈指可数", pinyin:"qū zhǐ kě shǔ", meaning:"손꼽을 정도로 적다" },
+    { hanzi:"供不应求", pinyin:"gōng bù yìng qiú", meaning:"공급이 수요를 따르지 못하다" },
+    { hanzi:"迫不及待", pinyin:"pò bù jí dài", meaning:"한시도 지체할 수 없다" },
+    { hanzi:"不言而喻", pinyin:"bù yán ér yù", meaning:"말하지 않아도 알다, 자명하다" },
+    { hanzi:"锲而不舍", pinyin:"qiè ér bù shě", meaning:"끈기 있게 포기하지 않다" },
+    { hanzi:"息息相关", pinyin:"xī xī xiāng guān", meaning:"밀접한 관계가 있다" },
+    { hanzi:"名副其实", pinyin:"míng fù qí shí", meaning:"명실상부하다" },
+    { hanzi:"得天独厚", pinyin:"dé tiān dú hòu", meaning:"천혜의 조건을 갖추다" },
+    { hanzi:"层出不穷", pinyin:"céng chū bù qióng", meaning:"끊임없이 나타나다" },
+    { hanzi:"脍炙人口", pinyin:"kuài zhì rén kǒu", meaning:"사람들 입에 널리 오르내리다" }
+  ];
+
+  let index = 0;
+  let flipped = false;
+
+  const cardEl = document.getElementById("card");
+  const sceneEl = document.getElementById("scene");
+  const hanziEl = document.getElementById("hanziText");
+  const pinyinEl = document.getElementById("pinyinText");
+  const meaningEl = document.getElementById("meaningText");
+  const counterEl = document.getElementById("counter");
+
+  function render(){
+    const w = words[index];
+    hanziEl.textContent = w.hanzi;
+    pinyinEl.textContent = w.pinyin;
+    meaningEl.textContent = w.meaning;
+    counterEl.textContent = (index + 1) + " / " + words.length;
+  }
+
+  function setFlipped(state){
+    flipped = state;
+    cardEl.classList.toggle("flipped", flipped);
+  }
+
+  function goTo(newIndex){
+    index = (newIndex + words.length) % words.length;
+    setFlipped(false);
+    render();
+  }
+
+  document.getElementById("prevBtn").addEventListener("click", () => goTo(index - 1));
+  document.getElementById("nextBtn").addEventListener("click", () => goTo(index + 1));
+  document.getElementById("flipBtn").addEventListener("click", () => setFlipped(!flipped));
+  sceneEl.addEventListener("click", () => setFlipped(!flipped));
+
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "ArrowLeft") goTo(index - 1);
+    if(e.key === "ArrowRight") goTo(index + 1);
+    if(e.key === " "){ e.preventDefault(); setFlipped(!flipped); }
+  });
+
+  render();
+</script>
+
+</body>
+</html>
