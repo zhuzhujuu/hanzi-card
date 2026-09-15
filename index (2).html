@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HSK 6级 한자 플래시카드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef0ef;
+    --card-bg:#ffffff;
+    --ink:#2c2c2a;
+    --muted:#8b8d89;
+    --muted-soft:#a7a9a4;
+    --border:rgba(0,0,0,0.07);
+    --btn-bg:#f6f6f5;
+    --btn-border:#e2e3e0;
+    --btn-hover:#ececea;
+    --correct:#7c9885;
+    --correct-dark:#5f7a68;
+    --wrong:#c08b83;
+    --wrong-dark:#a06f68;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{ height:100%; margin:0; }
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Noto Sans KR", sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    padding:32px 20px;
+  }
+
+  .stage{
+    width:100%;
+    max-width:460px;
+  }
+
+  .masthead{
+    text-align:center;
+    margin-bottom:22px;
+  }
+
+  .masthead .cn{
+    font-family:"Noto Serif SC", serif;
+    font-size:13px;
+    letter-spacing:0.3em;
+    color:var(--muted);
+    margin:0 0 6px;
+  }
+
+  .masthead h1{
+    font-size:18px;
+    font-weight:700;
+    margin:0;
+    letter-spacing:0.01em;
+    color:var(--ink);
+  }
+
+  .status-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
+    padding:0 4px;
+  }
+
+  .counter{
+    font-size:13px;
+    color:var(--muted);
+    letter-spacing:0.02em;
+  }
+
+  .stats{
+    font-size:12px;
+    color:var(--muted);
+    letter-spacing:0.02em;
+  }
+
+  .stats .n-correct{ color:var(--correct-dark); font-weight:600; }
+  .stats .n-wrong{ color:var(--wrong-dark); font-weight:600; }
+
+  .scene{
+    perspective:1400px;
+    height:380px;
+    cursor:pointer;
+  }
+
+  .card{
+    position:relative;
+    width:100%;
+    height:100%;
+    transform-style:preserve-3d;
+    transition:transform 0.5s cubic-bezier(.4,.2,.2,1);
+  }
+
+  .card.flipped{ transform:rotateY(180deg); }
+
+  .face{
+    position:absolute;
+    inset:0;
+    -webkit-backface-visibility:hidden;
+    backface-visibility:hidden;
+    border-radius:22px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    box-shadow: 0 16px 32px -18px rgba(44,44,42,0.18);
+    padding:24px;
+    text-align:center;
+  }
+
+  .face-back{
+    transform:rotateY(180deg);
+    justify-content:center;
+    padding:28px 26px;
+  }
+
+  .hanzi{
+    font-family:"Noto Serif SC", serif;
+    font-weight:700;
+    color:var(--ink);
+    line-height:1;
+    white-space:nowrap;
+  }
+
+  .hint{
+    margin-top:20px;
+    font-size:12px;
+    letter-spacing:0.2em;
+    color:var(--muted);
+  }
+
+  .pinyin{
+    font-family:"Noto Serif SC", serif;
+    font-weight:500;
+    font-size:22px;
+    color:var(--muted);
+    margin-bottom:12px;
+  }
+
+  .divider{
+    width:32px;
+    height:1px;
+    background:var(--border);
+    margin-bottom:12px;
+  }
+
+  .meaning{
+    font-size:17px;
+    font-weight:500;
+    line-height:1.5;
+    color:var(--ink);
+    margin-bottom:16px;
+  }
+
+  .detail-block{
+    width:100%;
+    text-align:left;
+    border-top:1px solid var(--border);
+    padding-top:14px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .detail-line{
+    font-size:12.5px;
+    line-height:1.5;
+    color:var(--muted);
+  }
+
+  .detail-label{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    color:var(--muted-soft);
+    letter-spacing:0.06em;
+    margin-right:4px;
+  }
+
+  .detail-line.example .cn-text{
+    font-family:"Noto Serif SC", serif;
+    color:var(--ink);
+  }
+
+  .controls{
+    display:grid;
+    grid-template-columns:1fr 1.2fr 1fr;
+    gap:10px;
+    margin-top:20px;
+  }
+
+  .controls-quiz{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:10px;
+  }
+
+  .controls-secondary{
+    display:grid;
+    grid-template-columns:1fr;
+    margin-top:10px;
+  }
+
+  button{
+    font-family:"Noto Sans KR", sans-serif;
+    font-size:14px;
+    font-weight:500;
+    padding:13px 8px;
+    border-radius:12px;
+    border:1px solid var(--btn-border);
+    background:var(--btn-bg);
+    color:var(--ink);
+    cursor:pointer;
+    transition:background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+
+  button:hover{ background:var(--btn-hover); }
+  button:active{ background:#e6e6e4; }
+
+  button:focus-visible{
+    outline:2px solid var(--muted);
+    outline-offset:2px;
+  }
+
+  .btn-flip{
+    background:var(--ink);
+    color:#fff;
+    border-color:var(--ink);
+    font-weight:600;
+  }
+  .btn-flip:hover{ background:#454542; border-color:#454542; }
+
+  .btn-wrong{
+    background:#fbf2f1;
+    color:var(--wrong-dark);
+    border-color:#eeded9;
+  }
+  .btn-wrong:hover{ background:#f6e6e3; }
+
+  .btn-correct{
+    background:#f1f5f1;
+    color:var(--correct-dark);
+    border-color:#dde7dc;
+  }
+  .btn-correct:hover{ background:#e6ede5; }
+
+  .btn-shuffle{
+    color:var(--muted);
+    font-size:13px;
+    background:transparent;
+    border-color:var(--btn-border);
+  }
+  .btn-shuffle:hover{ background:var(--btn-hover); }
+
+  .footnote{
+    text-align:center;
+    margin-top:18px;
+    font-size:12px;
+    color:var(--muted);
+  }
+
+  @media (max-width:380px){
+    .scene{ height:400px; }
+    .controls{ grid-template-columns:1fr 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="masthead">
+    <p class="cn">汉语水平考试 · 六级 · 考前一天总复习</p>
+    <h1>HSK 6급 시험 전날 핵심 어휘</h1>
+  </div>
+
+  <div class="status-row">
+    <span class="counter" id="counter">1 / 20</span>
+    <span class="stats" id="stats">맞음 <span class="n-correct">0</span> · 다시 풀 카드 <span class="n-wrong">0</span></span>
+  </div>
+
+  <div class="scene" id="scene">
+    <div class="card" id="card">
+      <div class="face face-front">
+        <div class="hanzi" id="hanziText"></div>
+        <div class="hint">탭하여 뒤집기</div>
+      </div>
+      <div class="face face-back">
+        <div class="pinyin" id="pinyinText"></div>
+        <div class="divider"></div>
+        <div class="meaning" id="meaningText"></div>
+        <div class="detail-block">
+          <div class="detail-line usage"><span class="detail-label">어법</span><span id="usageText"></span></div>
+          <div class="detail-line example"><span class="detail-label">예문</span><span class="cn-text" id="exampleCnText"></span></div>
+          <div class="detail-line example-kr"><span id="exampleKrText"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="prevBtn" type="button">← 이전</button>
+    <button id="flipBtn" class="btn-flip" type="button">뒤집기</button>
+    <button id="nextBtn" type="button">다음 →</button>
+  </div>
+
+  <div class="controls-quiz">
+    <button id="wrongBtn" class="btn-wrong" type="button">✕ 틀림</button>
+    <button id="correctBtn" class="btn-correct" type="button">✓ 맞음</button>
+  </div>
+
+  <div class="controls-secondary">
+    <button id="shuffleBtn" class="btn-shuffle" type="button">🔀 순서 섞기</button>
+  </div>
+
+  <p class="footnote">틀린 카드는 이번 학습에서 다시 한 번 나옵니다</p>
+</div>
+
+<script>
+  const baseWords = [
+    {
+      hanzi:"不可思议", pinyin:"bù kě sī yì",
+      meaning:"불가사의하다, 상상할 수 없다",
+      usage:"정도부사의 수식을 받는 형용사성 성어 (很不可思议)",
+      exampleCn:"这件事简直不可思议。",
+      exampleKr:"이 일은 정말 불가사의하다."
+    },
+    {
+      hanzi:"恍然大悟", pinyin:"huǎng rán dà wù",
+      meaning:"문득 깨닫다",
+      usage:"주로 술어로 쓰이며 뒤에 목적어를 두지 않음",
+      exampleCn:"听他解释后，我恍然大悟。",
+      exampleKr:"그의 설명을 듣고 나서야 문득 깨달았다."
+    },
+    {
+      hanzi:"络绎不绝", pinyin:"luò yì bù jué",
+      meaning:"왕래가 끊이지 않다",
+      usage:"사람·차량이 많음을 나타내며 주로 술어로 쓰임",
+      exampleCn:"节日期间，游客络绎不绝。",
+      exampleKr:"명절 기간에 관광객의 발길이 끊이지 않는다."
+    },
+    {
+      hanzi:"举世瞩目", pinyin:"jǔ shì zhǔ mù",
+      meaning:"온 세상이 주목하다",
+      usage:"관형어로 자주 쓰여 명사를 수식 (举世瞩目的成就)",
+      exampleCn:"中国航天取得了举世瞩目的成就。",
+      exampleKr:"중국 우주항공은 세계가 주목할 성과를 거두었다."
+    },
+    {
+      hanzi:"屈指可数", pinyin:"qū zhǐ kě shǔ",
+      meaning:"손꼽을 정도로 적다",
+      usage:"술어로 쓰여 수량이 매우 적음을 강조",
+      exampleCn:"能做到这一点的人屈指可数。",
+      exampleKr:"이것을 해낼 수 있는 사람은 손에 꼽을 정도다."
+    },
+    {
+      hanzi:"供不应求", pinyin:"gōng bù yìng qiú",
+      meaning:"공급이 수요를 따르지 못하다",
+      usage:"술어로 쓰여 상품·자원 부족 상황을 묘사",
+      exampleCn:"这款产品一上市就供不应求。",
+      exampleKr:"이 제품은 출시되자마자 공급이 수요를 따라가지 못했다."
+    },
+    {
+      hanzi:"迫不及待", pinyin:"pò bù jí dài",
+      meaning:"한시도 지체할 수 없다",
+      usage:"부사어(地)나 술어로 쓰임 (迫不及待地做某事)",
+      exampleCn:"他迫不及待地打开了礼物。",
+      exampleKr:"그는 한시도 기다리지 못하고 선물을 열었다."
+    },
+    {
+      hanzi:"名副其实", pinyin:"míng fù qí shí",
+      meaning:"명실상부하다",
+      usage:"술어 또는 관형어(名副其实的)로 쓰임",
+      exampleCn:"她是名副其实的学霸。",
+      exampleKr:"그녀는 명실상부한 공부벌레다."
+    },
+    {
+      hanzi:"得天独厚", pinyin:"dé tiān dú hòu",
+      meaning:"천혜의 조건을 갖추다",
+      usage:"관형어로 자주 쓰여 조건·환경을 수식",
+      exampleCn:"这里有得天独厚的自然条件。",
+      exampleKr:"이곳은 천혜의 자연조건을 갖추고 있다."
+    },
+    {
+      hanzi:"层出不穷", pinyin:"céng chū bù qióng",
+      meaning:"끊임없이 나타나다",
+      usage:"술어로 쓰여 문제·현상이 계속 발생함을 나타냄",
+      exampleCn:"新的问题层出不穷。",
+      exampleKr:"새로운 문제가 끊임없이 나타난다."
+    },
+    {
+      hanzi:"脍炙人口", pinyin:"kuài zhì rén kǒu",
+      meaning:"사람들 입에 널리 오르내리다",
+      usage:"관형어로 자주 쓰여 작품·노래를 수식",
+      exampleCn:"这首歌脍炙人口。",
+      exampleKr:"이 노래는 널리 사랑받는다."
+    },
+    {
+      hanzi:"不仅…而且", pinyin:"bù jǐn … ér qiě",
+      meaning:"~뿐만 아니라 게다가",
+      usage:"점층 관계 접속사, 뒤 절에 也/还를 함께 쓰기도 함",
+      exampleCn:"他不仅聪明，而且很努力。",
+      exampleKr:"그는 똑똑할 뿐만 아니라 노력도 한다."
+    },
+    {
+      hanzi:"无论…都", pinyin:"wú lùn … dōu",
+      meaning:"~을 막론하고 모두",
+      usage:"조건에 상관없이 결과가 같음을 나타내는 접속사",
+      exampleCn:"无论多忙，他都坚持锻炼。",
+      exampleKr:"아무리 바빠도 그는 꾸준히 운동한다."
+    },
+    {
+      hanzi:"之所以…是因为", pinyin:"zhī suǒ yǐ … shì yīn wèi",
+      meaning:"~한 까닭은 ~때문이다",
+      usage:"결과를 먼저, 원인을 뒤에 설명하는 인과 구문",
+      exampleCn:"他之所以成功，是因为坚持不懈。",
+      exampleKr:"그가 성공한 것은 끊임없이 노력했기 때문이다."
+    },
+    {
+      hanzi:"除非…才", pinyin:"chú fēi … cái",
+      meaning:"~해야만 비로소 ~하다",
+      usage:"유일한 조건을 나타내는 접속사, 才 뒤에 결과절",
+      exampleCn:"除非你道歉，他才会原谅你。",
+      exampleKr:"네가 사과해야만 그가 너를 용서할 것이다."
+    },
+    {
+      hanzi:"以免", pinyin:"yǐ miǎn",
+      meaning:"~하지 않도록, ~를 면하기 위해",
+      usage:"뒤 절 앞에 쓰여 좋지 않은 결과를 피함을 나타냄",
+      exampleCn:"早点出发，以免迟到。",
+      exampleKr:"늦지 않도록 일찍 출발해라."
+    },
+    {
+      hanzi:"甚至", pinyin:"shèn zhì",
+      meaning:"심지어",
+      usage:"정도의 심화를 강조하는 부사, 목록 마지막 항목 앞에 위치",
+      exampleCn:"他忙得甚至没时间吃饭。",
+      exampleKr:"그는 밥 먹을 시간조차 없을 정도로 바쁘다."
+    },
+    {
+      hanzi:"尽管…但是", pinyin:"jǐn guǎn … dàn shì",
+      meaning:"비록 ~이지만",
+      usage:"양보 관계 접속사, 사실을 인정하며 상반된 결과를 이어줌",
+      exampleCn:"尽管很累，但是他还是坚持完成了任务。",
+      exampleKr:"비록 피곤했지만 그는 끝까지 임무를 완수했다."
+    },
+    {
+      hanzi:"侵犯", pinyin:"qīn fàn",
+      meaning:"침범하다, 침해하다",
+      usage:"뒤에 권리·영역을 나타내는 명사 목적어를 동반",
+      exampleCn:"这种行为侵犯了消费者的权益。",
+      exampleKr:"이런 행위는 소비자의 권익을 침해한다."
+    },
+    {
+      hanzi:"妥协", pinyin:"tuǒ xié",
+      meaning:"타협하다",
+      usage:"자동사로 목적어를 취하지 않음, 对/向…妥协 형태로 씀",
+      exampleCn:"他从不向困难妥协。",
+      exampleKr:"그는 어려움에 결코 타협하지 않는다."
+    }
+  ];
+
+  let queue = baseWords.slice();
+  let pos = 0;
+  let flipped = false;
+  let correctCount = 0;
+  let wrongCount = 0;
+
+  const cardEl = document.getElementById("card");
+  const sceneEl = document.getElementById("scene");
+  const hanziEl = document.getElementById("hanziText");
+  const pinyinEl = document.getElementById("pinyinText");
+  const meaningEl = document.getElementById("meaningText");
+  const usageEl = document.getElementById("usageText");
+  const exampleCnEl = document.getElementById("exampleCnText");
+  const exampleKrEl = document.getElementById("exampleKrText");
+  const counterEl = document.getElementById("counter");
+  const nCorrectEl = document.querySelector(".n-correct");
+  const nWrongEl = document.querySelector(".n-wrong");
+
+  function hanziFontSize(len){
+    if(len <= 2) return "clamp(56px, 18vw, 100px)";
+    if(len === 3) return "clamp(48px, 15vw, 84px)";
+    if(len === 4) return "clamp(40px, 13vw, 72px)";
+    if(len <= 6) return "clamp(30px, 10vw, 52px)";
+    return "clamp(20px, 6.5vw, 34px)";
+  }
+
+  function render(){
+    const w = queue[pos];
+    hanziEl.textContent = w.hanzi;
+    hanziEl.style.fontSize = hanziFontSize(w.hanzi.length);
+    pinyinEl.textContent = w.pinyin;
+    meaningEl.textContent = w.meaning;
+    usageEl.textContent = w.usage;
+    exampleCnEl.textContent = w.exampleCn;
+    exampleKrEl.textContent = w.exampleKr;
+    counterEl.textContent = (pos + 1) + " / " + queue.length;
+    nCorrectEl.textContent = correctCount;
+    nWrongEl.textContent = wrongCount;
+  }
+
+  function setFlipped(state){
+    flipped = state;
+    cardEl.classList.toggle("flipped", flipped);
+  }
+
+  function goTo(newIndex){
+    pos = (newIndex + queue.length) % queue.length;
+    setFlipped(false);
+    render();
+  }
+
+  function markCorrect(){
+    correctCount++;
+    goTo(pos + 1);
+  }
+
+  function markWrong(){
+    wrongCount++;
+    queue.push(queue[pos]);
+    goTo(pos + 1);
+  }
+
+  function shuffle(){
+    for(let i = queue.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [queue[i], queue[j]] = [queue[j], queue[i]];
+    }
+    pos = 0;
+    setFlipped(false);
+    render();
+  }
+
+  document.getElementById("prevBtn").addEventListener("click", () => goTo(pos - 1));
+  document.getElementById("nextBtn").addEventListener("click", () => goTo(pos + 1));
+  document.getElementById("flipBtn").addEventListener("click", () => setFlipped(!flipped));
+  document.getElementById("correctBtn").addEventListener("click", markCorrect);
+  document.getElementById("wrongBtn").addEventListener("click", markWrong);
+  document.getElementById("shuffleBtn").addEventListener("click", shuffle);
+  sceneEl.addEventListener("click", () => setFlipped(!flipped));
+
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "ArrowLeft") goTo(pos - 1);
+    if(e.key === "ArrowRight") goTo(pos + 1);
+    if(e.key === " "){ e.preventDefault(); setFlipped(!flipped); }
+  });
+
+  render();
+</script>
+
+</body>
+</html>
